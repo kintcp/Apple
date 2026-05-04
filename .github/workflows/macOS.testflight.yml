@@ -72,7 +72,7 @@ jobs:
       - name: 🚀 Build app
         shell: bash
         run: |
-          git apply script/macos/*.patch --allow-empty
+          # git apply script/macos/*.patch --allow-empty
           next_build_number=$((${{ steps.update_build_number.outputs.build-number }} + 1))
           export BUILD_NUMBER=$next_build_number
           ./script/build_macos.sh
