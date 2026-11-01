@@ -1,0 +1,46 @@
+name: 'Setup Apple Signing Keychain'
+description: 'Restore, set default, and unlock pre-bundled macOS keychain for code signing'
+inputs:
+  keychain-base64:
+    description: 'Base64 encoded string of signing.keychain-db'
+    required: true
+  keychain-password:
+    description: 'Password used to unlock the keychain'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Load and configure keychain
+      shell: bash
+      run: |
+        KEYCHAIN_DIR="$HOME/Library/Keychains"
+        KEYCHAIN_PATH="$KEYCHAIN_DIR/signing.keychain-db"
+        
+        mkdir -p "$KEYCHAIN_DIR"
+
+        echo "1. 从 Base64 还原钥匙串数据库..."
+        echo "${{ inputs.keychain-base64 }}" | base64 --decode > "$KEYCHAIN_PATH"
+
+        echo "2. 配置钥匙串超时并解锁..."
+        security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+        security unlock-keychain -p "${{ inputs.keychain-password }}" "$KEYCHAIN_PATH"
+
+        echo "3. 设置为当前系统默认钥匙串 (Default Keychain)..."
+        # 记录原本的默认钥匙串路径，方便后续恢复或参考
+        ORIGINAL_DEFAULT=$(security default-keychain -d user | tr -d '"' | tr -d ' ')
+        echo "原默认钥匙串: $ORIGINAL_DEFAULT"
+        
+        # 将新钥匙串设为当前环境的默认钥匙串
+        security default-keychain -s "$KEYCHAIN_PATH"
+
+        echo "4. 挂载到钥匙串搜索列表首位..."
+        EXISTING_LIST=$(security list-keychains -d user | tr -d '"' | tr '\n' ' ')
+        security list-keychains -d user -s "$KEYCHAIN_PATH" $EXISTING_LIST
+
+        echo "5. 授权 codesign 免弹窗访问私钥..."
+        security set-key-partition-list -S apple-tool:,apple: -s -k "${{ inputs.keychain-password }}" "$KEYCHAIN_PATH"
+
+        echo "6. 验证环境默认钥匙串与身份列表:"
+        echo "当前默认钥匙串: $(security default-keychain | tr -d '"')"
+        security find-identity -v -p codesigning
