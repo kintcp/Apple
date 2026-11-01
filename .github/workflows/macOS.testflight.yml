@@ -58,6 +58,7 @@ jobs:
 
       - name: 🧾 Print Build Number
         run: |
+          security find-identity -v -p codesigning
           echo "Build Number: ${{ steps.update_build_number.outputs.build-number }}"
           cat iPlay.xcodeproj/project.pbxproj | grep -A 1 'CURRENT_PROJECT_VERSION = '
 
