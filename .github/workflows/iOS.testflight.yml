@@ -24,9 +24,9 @@ jobs:
 
       - name: 🔑 Import code sign
         continue-on-error: true
-        uses: apple-actions/import-codesign-certs@v3
+        uses: saltpi/import-codesign-certs@main
         with:
-          p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          p12-zip-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
         
       - name: 📄 Download provisioning profiles
@@ -73,6 +73,7 @@ jobs:
 
       - name: 🧾 Print Build Number
         run: |
+          security find-identity -v -p basic
           echo "Build Number: ${{ steps.update_build_number.outputs.build-number }}"
           cat iPlay.xcodeproj/project.pbxproj | grep -A 1 'CURRENT_PROJECT_VERSION = '
 
