@@ -24,9 +24,9 @@ jobs:
 
       - name: 🔑 Import code sign
         continue-on-error: true
-        uses: apple-actions/import-codesign-certs@v3
+        uses: saltpi/import-codesign-certs@main
         with:
-          p12-file-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
+          p12-zip-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
           p12-password: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
         
       - name: 📄 Download provisioning profiles
