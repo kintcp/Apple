@@ -28,8 +28,8 @@ jobs:
         continue-on-error: true
         uses: saltpi/import-codesign-certs@main
         with:
-          p12-zip-base64: ${{ secrets.BUILD_CERTIFICATE_BASE64 }}
-          p12-password: ${{ secrets.BUILD_CERTIFICATE_PASSWORD }}
+          p12-zip-base64: ${{ secrets.P12_ZIP_BASE64 }}
+          p12-password: ${{ secrets.P12_PASSWORD }}
         
       - name: 📄 Download provisioning profiles
         uses: apple-actions/download-provisioning-profiles@v4
